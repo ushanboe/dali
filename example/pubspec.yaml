@@ -1,0 +1,17 @@
+name: dali_example
+description: Interactive showcase for the Dali procedural graphics package.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dali:
+    path: ../
+
+flutter:
+  uses-material-design: true
