@@ -7,7 +7,7 @@ import '../painters/scene_painter.dart';
 /// ```dart
 /// Stack(
 ///   children: [
-///     DaliScene(config: SceneConfig(type: SceneType.beach, timeOfDay: TimeOfDay.day)),
+///     DaliScene(config: SceneConfig(type: SceneType.beach, timeOfDay: DayTime.day)),
 ///     Positioned(bottom: 0, child: DaliAvatar(config: avatarConfig, size: 200)),
 ///   ],
 /// )

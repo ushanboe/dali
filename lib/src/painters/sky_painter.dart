@@ -20,8 +20,8 @@ class SkyPainter {
     } else {
       _paintClouds(canvas, w, h, skyBottom, heavy: false);
     }
-    if (config.timeOfDay == TimeOfDay.night ||
-        config.timeOfDay == TimeOfDay.dawn) {
+    if (config.timeOfDay == DayTime.night ||
+        config.timeOfDay == DayTime.dawn) {
       _paintStars(canvas, w, h, skyBottom);
     }
     if (config.weather == Weather.rainy) _paintRain(canvas, w, h, skyBottom);
@@ -43,20 +43,20 @@ class SkyPainter {
   }
 
   List<Color> _skyColors() => switch (config.timeOfDay) {
-    TimeOfDay.day => [const Color(0xFF4FC3F7), const Color(0xFF81D4FA), const Color(0xFFB3E5FC)],
-    TimeOfDay.dawn => [const Color(0xFF1A237E), const Color(0xFFE91E63), const Color(0xFFFF9800), const Color(0xFFFFCC80)],
-    TimeOfDay.dusk => [const Color(0xFF311B92), const Color(0xFFE53935), const Color(0xFFFF7043), const Color(0xFFFFB74D)],
-    TimeOfDay.night => [const Color(0xFF0A0A1A), const Color(0xFF0D1B3E), const Color(0xFF1A237E)],
+    DayTime.day => [const Color(0xFF4FC3F7), const Color(0xFF81D4FA), const Color(0xFFB3E5FC)],
+    DayTime.dawn => [const Color(0xFF1A237E), const Color(0xFFE91E63), const Color(0xFFFF9800), const Color(0xFFFFCC80)],
+    DayTime.dusk => [const Color(0xFF311B92), const Color(0xFFE53935), const Color(0xFFFF7043), const Color(0xFFFFB74D)],
+    DayTime.night => [const Color(0xFF0A0A1A), const Color(0xFF0D1B3E), const Color(0xFF1A237E)],
   };
 
   void _paintCelestialBody(Canvas canvas, double w, double h) {
     switch (config.timeOfDay) {
-      case TimeOfDay.day:
-      case TimeOfDay.dawn:
+      case DayTime.day:
+      case DayTime.dawn:
         _paintSun(canvas, w, h);
-      case TimeOfDay.dusk:
+      case DayTime.dusk:
         _paintSun(canvas, w, h, setting: true);
-      case TimeOfDay.night:
+      case DayTime.night:
         _paintMoon(canvas, w, h);
     }
   }

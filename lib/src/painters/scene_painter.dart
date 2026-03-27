@@ -254,7 +254,7 @@ class ScenePainter extends CustomPainter {
         _fill(color),
       );
       // Windows
-      final winColor = config.timeOfDay == TimeOfDay.night
+      final winColor = config.timeOfDay == DayTime.night
           ? Colors.yellow.withOpacity(0.8)
           : Colors.lightBlue.withOpacity(0.5);
       for (int row = 0; row < 5; row++) {
@@ -463,10 +463,10 @@ class ScenePainter extends CustomPainter {
     );
     // Sky outside
     final skyColor = switch (config.timeOfDay) {
-      TimeOfDay.day => const Color(0xFF81D4FA),
-      TimeOfDay.dawn => const Color(0xFFFF9800),
-      TimeOfDay.dusk => const Color(0xFFE53935),
-      TimeOfDay.night => const Color(0xFF0D1B3E),
+      DayTime.day => const Color(0xFF81D4FA),
+      DayTime.dawn => const Color(0xFFFF9800),
+      DayTime.dusk => const Color(0xFFE53935),
+      DayTime.night => const Color(0xFF0D1B3E),
     };
     canvas.drawRect(
       Rect.fromLTWH(sw(x + 0.02, sz), sh(y + 0.025, sz), sw(w - 0.04, sz), sh(h - 0.05, sz)),
@@ -557,7 +557,7 @@ class ScenePainter extends CustomPainter {
     shade.close();
     canvas.drawPath(shade, _fill(const Color(0xFFFFF9C4)));
     // Light glow
-    if (config.timeOfDay == TimeOfDay.night) {
+    if (config.timeOfDay == DayTime.night) {
       canvas.drawCircle(
         s(cx, groundY - 0.12, sz), sw(0.12, sz),
         Paint()..color = Colors.yellow.withOpacity(0.12),

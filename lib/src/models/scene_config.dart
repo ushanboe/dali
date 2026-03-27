@@ -11,22 +11,22 @@ enum SceneType {
   underwater,
 }
 
-enum TimeOfDay { dawn, day, dusk, night }
+enum DayTime { dawn, day, dusk, night }
 
 enum Weather { clear, cloudy, rainy, snowy }
 
 class SceneConfig {
   final SceneType type;
-  final TimeOfDay timeOfDay;
+  final DayTime timeOfDay;
   final Weather weather;
 
   const SceneConfig({
     this.type = SceneType.park,
-    this.timeOfDay = TimeOfDay.day,
+    this.timeOfDay = DayTime.day,
     this.weather = Weather.clear,
   });
 
-  SceneConfig copyWith({SceneType? type, TimeOfDay? timeOfDay, Weather? weather}) {
+  SceneConfig copyWith({SceneType? type, DayTime? timeOfDay, Weather? weather}) {
     return SceneConfig(
       type: type ?? this.type,
       timeOfDay: timeOfDay ?? this.timeOfDay,

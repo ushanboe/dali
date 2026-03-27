@@ -265,7 +265,7 @@ class SceneShowcasePage extends StatefulWidget {
 
 class _SceneShowcasePageState extends State<SceneShowcasePage> {
   SceneType _sceneType = SceneType.park;
-  TimeOfDay _timeOfDay = TimeOfDay.day;
+  DayTime _timeOfDay = DayTime.day;
   Weather _weather = Weather.clear;
 
   SceneConfig get _config => SceneConfig(type: _sceneType, timeOfDay: _timeOfDay, weather: _weather);
@@ -308,7 +308,7 @@ class _SceneShowcasePageState extends State<SceneShowcasePage> {
               _chips(SceneType.values, _sceneType, (v) => setState(() => _sceneType = v),
                   label: _sceneLabel),
               _section('Time of Day'),
-              _chips(TimeOfDay.values, _timeOfDay, (v) => setState(() => _timeOfDay = v),
+              _chips(DayTime.values, _timeOfDay, (v) => setState(() => _timeOfDay = v),
                   label: (v) => v.name),
               _section('Weather'),
               _chips(Weather.values, _weather, (v) => setState(() => _weather = v),
