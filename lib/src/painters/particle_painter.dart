@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/effects_config.dart';
 
@@ -45,10 +46,9 @@ class ParticlePainter extends CustomPainter {
   double _cos(double a) => _approxCos(a);
   double _sin(double a) => _approxCos(a - 1.5708);
 
-  /// Deterministic pseudo-random from seed.
+  /// Deterministic pseudo-random from seed — uses sin hash for good spread.
   double _rand(int seed) {
-    final x = (seed * 1664525 + 1013904223) & 0x7FFFFFFF;
-    return x / 0x7FFFFFFF;
+    return (math.sin(seed * 127.1 + 311.7) * 43758.5453).abs() % 1.0;
   }
 
   Paint _fill(Color c) => Paint()..color = c..style = PaintingStyle.fill;
