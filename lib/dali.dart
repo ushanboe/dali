@@ -6,9 +6,11 @@ library dali;
 
 // Widgets
 export 'src/widgets/dali_avatar.dart';
+export 'src/widgets/dali_scene.dart';
 
 // Models
 export 'src/models/avatar_config.dart';
+export 'src/models/scene_config.dart';
 
 // Palettes
 export 'src/palettes/skin_tones.dart';
