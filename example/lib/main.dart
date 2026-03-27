@@ -34,7 +34,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 2, vsync: this);
+    _tabs = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -58,6 +58,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome>
           tabs: const [
             Tab(icon: Icon(Icons.person), text: 'Avatar'),
             Tab(icon: Icon(Icons.landscape), text: 'Scenes'),
+            Tab(icon: Icon(Icons.category), text: 'Objects'),
           ],
         ),
       ),
@@ -66,6 +67,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome>
         children: const [
           AvatarCustomiserPage(),
           SceneShowcasePage(),
+          ObjectsShowcasePage(),
         ],
       ),
     );
@@ -364,5 +366,226 @@ class _SceneShowcasePageState extends State<SceneShowcasePage> {
     SceneType.bedroom => 'Bedroom', SceneType.kitchen => 'Kitchen',
     SceneType.classroom => 'Classroom', SceneType.salon => 'Salon',
     SceneType.space => 'Space', SceneType.underwater => 'Underwater',
+  };
+}
+
+// ── Objects Tab ───────────────────────────────────────────────────────────────
+
+class ObjectsShowcasePage extends StatefulWidget {
+  const ObjectsShowcasePage({super.key});
+
+  @override
+  State<ObjectsShowcasePage> createState() => _ObjectsShowcasePageState();
+}
+
+class _ObjectsShowcasePageState extends State<ObjectsShowcasePage> {
+  // Selected items
+  AnimalType _animal = AnimalType.cat;
+  Color _animalColor = const Color(0xFFFF9800);
+  VehicleType _vehicle = VehicleType.car;
+  Color _vehicleColor = const Color(0xFF1565C0);
+  FoodType _food = FoodType.pizza;
+  FurnitureType _furniture = FurnitureType.sofa;
+  Color _furnitureColor = const Color(0xFF795548);
+
+  static const _objectColors = [
+    Color(0xFFE53935), Color(0xFFE91E63), Color(0xFF9C27B0), Color(0xFF1565C0),
+    Color(0xFF00897B), Color(0xFF43A047), Color(0xFFF57F17), Color(0xFFFF6F00),
+    Color(0xFF795548), Color(0xFF546E7A), Color(0xFF212121), Color(0xFFFFFFFF),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // ── Animals ──────────────────────────────────────────────────────────
+        _section('Animals'),
+        _colorRow(_objectColors, _animalColor, (c) => setState(() => _animalColor = c)),
+        const SizedBox(height: 12),
+        _objectGrid(
+          AnimalType.values,
+          _animal,
+          (v) => setState(() => _animal = v),
+          builder: (v, sel) => DaliObject.animal(v, size: 80, color: _animalColor),
+          label: _animalLabel,
+        ),
+        const SizedBox(height: 8),
+        _bigPreview(DaliObject.animal(_animal, size: 160, color: _animalColor)),
+
+        // ── Vehicles ─────────────────────────────────────────────────────────
+        _section('Vehicles'),
+        _colorRow(_objectColors, _vehicleColor, (c) => setState(() => _vehicleColor = c)),
+        const SizedBox(height: 12),
+        _objectGrid(
+          VehicleType.values,
+          _vehicle,
+          (v) => setState(() => _vehicle = v),
+          builder: (v, sel) => DaliObject.vehicle(v, size: 80, color: _vehicleColor),
+          label: _vehicleLabel,
+        ),
+        const SizedBox(height: 8),
+        _bigPreview(DaliObject.vehicle(_vehicle, size: 160, color: _vehicleColor)),
+
+        // ── Food ─────────────────────────────────────────────────────────────
+        _section('Food'),
+        _objectGrid(
+          FoodType.values,
+          _food,
+          (v) => setState(() => _food = v),
+          builder: (v, sel) => DaliObject.food(v, size: 80),
+          label: _foodLabel,
+        ),
+        const SizedBox(height: 8),
+        _bigPreview(DaliObject.food(_food, size: 160)),
+
+        // ── Furniture ────────────────────────────────────────────────────────
+        _section('Furniture'),
+        _colorRow(_objectColors, _furnitureColor, (c) => setState(() => _furnitureColor = c)),
+        const SizedBox(height: 12),
+        _objectGrid(
+          FurnitureType.values,
+          _furniture,
+          (v) => setState(() => _furniture = v),
+          builder: (v, sel) => DaliObject.furniture(v, size: 80, color: _furnitureColor),
+          label: _furnitureLabel,
+        ),
+        const SizedBox(height: 8),
+        _bigPreview(DaliObject.furniture(_furniture, size: 160, color: _furnitureColor)),
+
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _section(String t) => Padding(
+    padding: const EdgeInsets.only(top: 20, bottom: 8),
+    child: Text(t, style: const TextStyle(
+      fontWeight: FontWeight.bold, fontSize: 15,
+      color: Color(0xFF6B3A8A), letterSpacing: 0.5,
+    )),
+  );
+
+  Widget _bigPreview(Widget child) {
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0E8FF),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 12, offset: const Offset(0, 4)),
+          ],
+        ),
+        padding: const EdgeInsets.all(20),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _objectGrid<T>(
+    List<T> values,
+    T selected,
+    ValueChanged<T> onTap, {
+    required Widget Function(T, bool) builder,
+    required String Function(T) label,
+  }) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: values.map((v) {
+        final sel = v == selected;
+        return GestureDetector(
+          onTap: () => onTap(v),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                decoration: BoxDecoration(
+                  color: sel ? const Color(0xFFF0E8FF) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: sel ? const Color(0xFF9B59B6) : Colors.grey.shade300,
+                    width: sel ? 2.5 : 1.5,
+                  ),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: builder(v, sel),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label(v),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: sel ? const Color(0xFF6B3A8A) : Colors.black54,
+                  fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _colorRow(List<Color> colors, Color selected, ValueChanged<Color> onTap) {
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: colors.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (_, i) {
+          final c = colors[i];
+          final sel = c.value == selected.value;
+          return GestureDetector(
+            onTap: () => onTap(c),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                color: c, shape: BoxShape.circle,
+                border: Border.all(
+                  color: sel ? const Color(0xFF9B59B6) : Colors.white,
+                  width: sel ? 3 : 2,
+                ),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 4)],
+              ),
+              child: sel ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String _animalLabel(AnimalType t) => switch (t) {
+    AnimalType.cat => 'Cat', AnimalType.dog => 'Dog',
+    AnimalType.rabbit => 'Rabbit', AnimalType.bird => 'Bird',
+    AnimalType.fish => 'Fish', AnimalType.bear => 'Bear',
+    AnimalType.fox => 'Fox', AnimalType.penguin => 'Penguin',
+    AnimalType.elephant => 'Elephant', AnimalType.lion => 'Lion',
+  };
+
+  String _vehicleLabel(VehicleType t) => switch (t) {
+    VehicleType.car => 'Car', VehicleType.bus => 'Bus',
+    VehicleType.bike => 'Bike', VehicleType.plane => 'Plane',
+    VehicleType.boat => 'Boat', VehicleType.rocket => 'Rocket',
+  };
+
+  String _foodLabel(FoodType t) => switch (t) {
+    FoodType.apple => 'Apple', FoodType.banana => 'Banana',
+    FoodType.pizza => 'Pizza', FoodType.cake => 'Cake',
+    FoodType.iceCream => 'Ice Cream', FoodType.burger => 'Burger',
+    FoodType.donut => 'Donut', FoodType.watermelon => 'Melon',
+    FoodType.cupcake => 'Cupcake', FoodType.strawberry => 'Berry',
+    FoodType.lollipop => 'Lollipop', FoodType.star => 'Star',
+  };
+
+  String _furnitureLabel(FurnitureType t) => switch (t) {
+    FurnitureType.chair => 'Chair', FurnitureType.table => 'Table',
+    FurnitureType.bed => 'Bed', FurnitureType.sofa => 'Sofa',
+    FurnitureType.lamp => 'Lamp', FurnitureType.mirror => 'Mirror',
+    FurnitureType.shelf => 'Shelf', FurnitureType.door => 'Door',
   };
 }
