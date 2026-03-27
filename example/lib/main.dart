@@ -281,21 +281,27 @@ class _SceneShowcasePageState extends State<SceneShowcasePage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Scene preview
-        SizedBox(
-          height: 280,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              DaliScene(config: _config),
-              Positioned(
-                bottom: 0,
-                left: 0, right: 0,
-                child: Center(
-                  child: DaliAvatar(config: _avatar, size: 160),
+        // Scene preview — constrained to 16:9 so elements don't stretch
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ClipRect(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    DaliScene(config: _config),
+                    Positioned(
+                      bottom: 0, left: 0, right: 0,
+                      child: Center(
+                        child: DaliAvatar(config: _avatar, size: 140),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
 

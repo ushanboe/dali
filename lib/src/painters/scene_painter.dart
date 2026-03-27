@@ -28,6 +28,9 @@ class ScenePainter extends CustomPainter {
   Offset s(double x, double y, Size sz) => Offset(x * sz.width, y * sz.height);
   double sw(double x, Size sz) => x * sz.width;
   double sh(double y, Size sz) => y * sz.height;
+  /// Unit for sizing detail elements — based on height so proportions stay
+  /// correct at any aspect ratio (prevents giant trees on wide screens).
+  double u(double scale, Size sz) => sz.height * scale;
 
   Paint _fill(Color c) => Paint()..color = c..style = PaintingStyle.fill;
   Paint _stroke(Color c, double w) => Paint()
@@ -82,29 +85,27 @@ class ScenePainter extends CustomPainter {
 
   void _paintTree(Canvas canvas, Size sz, double cx, double groundY, double scale) {
     final w = sz.width; final h = sz.height;
+    final r = u(scale, sz); // height-based unit
     // Trunk
-    final trunkH = h * scale * 0.7;
-    final trunkW = w * scale * 0.18;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(w * cx, h * groundY + trunkH / 2),
-            width: trunkW, height: trunkH),
-        Radius.circular(trunkW / 2),
+        Rect.fromCenter(center: Offset(w * cx, h * groundY + r * 0.4),
+            width: r * 0.22, height: r * 0.8),
+        Radius.circular(r * 0.11),
       ),
       _fill(const Color(0xFF795548)),
     );
-    // Canopy layers
-    final canopyColors = [const Color(0xFF388E3C), const Color(0xFF4CAF50), const Color(0xFF66BB6A)];
+    // Canopy layers (3 overlapping circles)
+    final canopyColors = [const Color(0xFF2E7D32), const Color(0xFF4CAF50), const Color(0xFF66BB6A)];
     for (int i = 0; i < 3; i++) {
-      final layerY = h * groundY - h * scale * (0.4 + i * 0.35);
-      final layerR = w * scale * (0.55 - i * 0.08);
+      final layerY = h * groundY - r * (0.5 + i * 0.42);
+      final layerR = r * (0.65 - i * 0.08);
       canvas.drawCircle(Offset(w * cx, layerY), layerR, _fill(canopyColors[i]));
     }
-    // Canopy highlight
+    // Highlight
     canvas.drawCircle(
-      Offset(w * cx - w * scale * 0.12, h * groundY - h * scale * 1.1),
-      w * scale * 0.18,
-      _fill(Colors.white.withOpacity(0.12)),
+      Offset(w * cx - r * 0.18, h * groundY - r * 1.3),
+      r * 0.20, _fill(Colors.white.withOpacity(0.14)),
     );
   }
 
@@ -124,8 +125,17 @@ class ScenePainter extends CustomPainter {
     final colors = [Colors.red, Colors.yellow, Colors.pink, Colors.white];
     for (int i = 0; i < positions.length; i++) {
       final (fx, fy) = positions[i];
-      canvas.drawCircle(s(fx, fy, sz), sw(0.018, sz), _fill(colors[i]));
-      canvas.drawCircle(s(fx, fy, sz), sw(0.007, sz), _fill(Colors.yellow));
+      final r = u(0.030, sz);
+      // Petals
+      for (int p = 0; p < 5; p++) {
+        final angle = p * 1.2566;
+        canvas.drawCircle(
+          Offset(s(fx, fy, sz).dx + r * 1.1 * _cos(angle),
+                 s(fx, fy, sz).dy + r * 1.1 * _sin(angle)),
+          r * 0.7, _fill(colors[i].withOpacity(0.9)),
+        );
+      }
+      canvas.drawCircle(s(fx, fy, sz), r * 0.7, _fill(Colors.yellow));
     }
   }
 
@@ -345,22 +355,24 @@ class ScenePainter extends CustomPainter {
   void _paintPineTree(Canvas canvas, Size sz, double cx, double groundY,
       double scale, Color color) {
     final w = sz.width; final h = sz.height;
+    final r = u(scale, sz); // height-based
     // Trunk
     canvas.drawRect(
       Rect.fromCenter(
-        center: Offset(w * cx, h * groundY + h * scale * 0.15),
-        width: w * scale * 0.10, height: h * scale * 0.30,
+        center: Offset(w * cx, h * groundY + r * 0.2),
+        width: r * 0.14, height: r * 0.40,
       ),
       _fill(const Color(0xFF5D4037)),
     );
     // Three triangle tiers
     for (int t = 0; t < 3; t++) {
-      final tierY = groundY - scale * (0.20 + t * 0.30);
-      final tierW = scale * (0.55 - t * 0.10);
+      final tierBottom = h * groundY - r * (t * 0.38);
+      final tierTop = tierBottom - r * 0.50;
+      final tierHalfW = r * (0.60 - t * 0.08);
       final tri = Path();
-      tri.moveTo(w * cx, h * (tierY - scale * 0.30));
-      tri.lineTo(w * (cx - tierW), h * tierY);
-      tri.lineTo(w * (cx + tierW), h * tierY);
+      tri.moveTo(w * cx, tierTop);
+      tri.lineTo(w * cx - tierHalfW, tierBottom);
+      tri.lineTo(w * cx + tierHalfW, tierBottom);
       tri.close();
       canvas.drawPath(tri, _fill(t == 0 ? _darken(color, 0.1) : (t == 1 ? color : _lighten(color, 0.08))));
     }
@@ -1059,16 +1071,22 @@ class ScenePainter extends CustomPainter {
   }
 
   void _drawCoral(Canvas canvas, Size sz, double cx, double cy, Color color, int branches) {
-    final paint = _stroke(color, sw(0.012, sz));
-    final h = 0.14;
-    canvas.drawLine(s(cx, cy, sz), s(cx, cy - h, sz), paint);
+    final stemH = u(0.22, sz);
+    final stemPaint = _stroke(color, u(0.018, sz));
+    final base = s(cx, cy, sz);
+    canvas.drawLine(base, Offset(base.dx, base.dy - stemH), stemPaint);
     for (int i = 0; i < branches; i++) {
       final t = (i + 1) / (branches + 1);
-      final bx = cx + (i % 2 == 0 ? 0.03 : -0.03) * (1 + i * 0.5);
+      final dir = i % 2 == 0 ? 1.0 : -1.0;
+      final bx = base.dx + dir * u(0.06 + i * 0.015, sz);
+      final by = base.dy - stemH * t;
       canvas.drawLine(
-        s(cx, cy - h * t, sz), s(bx, cy - h * t - 0.05, sz),
-        _stroke(_lighten(color, 0.1), sw(0.008, sz)),
+        Offset(base.dx, by), Offset(bx, by - u(0.08, sz)),
+        _stroke(_lighten(color, 0.12), u(0.012, sz)),
       );
+      // Tip dot
+      canvas.drawCircle(Offset(bx, by - u(0.08, sz)), u(0.016, sz),
+          _fill(_lighten(color, 0.2)));
     }
   }
 
@@ -1114,44 +1132,72 @@ class ScenePainter extends CustomPainter {
   }
 
   void _drawFish(Canvas canvas, Size sz, double cx, double cy, Color color, double dir) {
+    final bw = u(0.10, sz); // body half-length — height based
+    final bh = u(0.040, sz);
+
     // Body
     final body = Path();
-    body.moveTo(sw(cx + dir * 0.06, sz), sh(cy, sz));
-    body.quadraticBezierTo(sw(cx + dir * 0.03, sz), sh(cy - 0.025, sz), sw(cx - dir * 0.04, sz), sh(cy, sz));
-    body.quadraticBezierTo(sw(cx + dir * 0.03, sz), sh(cy + 0.025, sz), sw(cx + dir * 0.06, sz), sh(cy, sz));
+    body.moveTo(s(cx, cy, sz).dx + dir * bw, s(cx, cy, sz).dy);
+    body.quadraticBezierTo(
+      s(cx, cy, sz).dx + dir * bw * 0.4, s(cx, cy, sz).dy - bh,
+      s(cx, cy, sz).dx - dir * bw * 0.6, s(cx, cy, sz).dy,
+    );
+    body.quadraticBezierTo(
+      s(cx, cy, sz).dx + dir * bw * 0.4, s(cx, cy, sz).dy + bh,
+      s(cx, cy, sz).dx + dir * bw, s(cx, cy, sz).dy,
+    );
     canvas.drawPath(body, _fill(color));
 
     // Tail
     final tail = Path();
-    tail.moveTo(sw(cx - dir * 0.04, sz), sh(cy, sz));
-    tail.lineTo(sw(cx - dir * 0.09, sz), sh(cy - 0.025, sz));
-    tail.lineTo(sw(cx - dir * 0.09, sz), sh(cy + 0.025, sz));
+    final tailX = s(cx, cy, sz).dx - dir * bw * 0.6;
+    tail.moveTo(tailX, s(cx, cy, sz).dy);
+    tail.lineTo(tailX - dir * bw * 0.5, s(cx, cy, sz).dy - bh);
+    tail.lineTo(tailX - dir * bw * 0.5, s(cx, cy, sz).dy + bh);
     tail.close();
-    canvas.drawPath(tail, _fill(_darken(color, 0.1)));
+    canvas.drawPath(tail, _fill(_darken(color, 0.12)));
+
+    // Fin on top
+    final finPath = Path();
+    finPath.moveTo(s(cx, cy, sz).dx, s(cx, cy, sz).dy - bh * 0.5);
+    finPath.quadraticBezierTo(
+      s(cx, cy, sz).dx + dir * bw * 0.2, s(cx, cy, sz).dy - bh * 1.5,
+      s(cx, cy, sz).dx + dir * bw * 0.4, s(cx, cy, sz).dy - bh * 0.6,
+    );
+    canvas.drawPath(finPath, _stroke(_darken(color, 0.08), u(0.008, sz)));
 
     // Eye
-    canvas.drawCircle(s(cx + dir * 0.04, cy - 0.006, sz), sw(0.008, sz), _fill(Colors.white));
-    canvas.drawCircle(s(cx + dir * 0.04, cy - 0.006, sz), sw(0.004, sz), _fill(Colors.black));
+    canvas.drawCircle(
+      Offset(s(cx, cy, sz).dx + dir * bw * 0.55, s(cx, cy, sz).dy - bh * 0.25),
+      u(0.014, sz), _fill(Colors.white),
+    );
+    canvas.drawCircle(
+      Offset(s(cx, cy, sz).dx + dir * bw * 0.55, s(cx, cy, sz).dy - bh * 0.25),
+      u(0.007, sz), _fill(Colors.black87),
+    );
 
     // Stripe
     canvas.drawLine(
-      s(cx + dir * 0.01, cy - 0.020, sz), s(cx + dir * 0.01, cy + 0.020, sz),
-      _stroke(Colors.white.withOpacity(0.4), sw(0.005, sz)),
+      Offset(s(cx, cy, sz).dx + dir * bw * 0.1, s(cx, cy, sz).dy - bh * 0.85),
+      Offset(s(cx, cy, sz).dx + dir * bw * 0.1, s(cx, cy, sz).dy + bh * 0.85),
+      _stroke(Colors.white.withOpacity(0.35), u(0.007, sz)),
     );
   }
 
   void _paintBubbles(Canvas canvas, Size sz) {
     final bubbles = [
-      (0.10, 0.50, 0.012), (0.25, 0.35, 0.018), (0.45, 0.20, 0.010),
-      (0.65, 0.40, 0.015), (0.80, 0.25, 0.020), (0.90, 0.55, 0.010),
+      (0.10, 0.50, 0.020), (0.25, 0.35, 0.030), (0.45, 0.20, 0.016),
+      (0.65, 0.40, 0.024), (0.80, 0.25, 0.034), (0.90, 0.55, 0.018),
     ];
     for (final (bx, by, r) in bubbles) {
-      canvas.drawCircle(s(bx, by, sz), sw(r, sz),
-          _stroke(Colors.white.withOpacity(0.4), sw(0.004, sz)));
+      final rad = u(r, sz);
+      canvas.drawCircle(s(bx, by, sz), rad,
+          _stroke(Colors.white.withOpacity(0.45), u(0.006, sz)));
+      // Shine highlight
       canvas.drawArc(
-        Rect.fromCircle(center: s(bx - r * 0.3, by - r * 0.3, sz), radius: sw(r * 0.4, sz)),
-        -1.0, 1.0, false,
-        _stroke(Colors.white.withOpacity(0.6), sw(0.002, sz)),
+        Rect.fromCircle(center: Offset(s(bx, by, sz).dx - rad * 0.3, s(bx, by, sz).dy - rad * 0.3), radius: rad * 0.38),
+        -1.0, 1.2, false,
+        _stroke(Colors.white.withOpacity(0.7), u(0.004, sz)),
       );
     }
   }
