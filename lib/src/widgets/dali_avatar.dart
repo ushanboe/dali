@@ -50,30 +50,25 @@ class _AvatarComposedPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Back hair layer (styles that go behind the head)
-    final backHairStyles = {
-      HairStyle.longStraight,
-      HairStyle.longCurly,
-      HairStyle.mediumStraight,
-      HairStyle.mediumWavy,
-      HairStyle.braids,
-      HairStyle.ponytail,
-    };
+    // Pass 1 — hair sides/back (y > 15% of height).
+    // Draws the portions that fall beside and below the head.
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, size.height * 0.15, size.width, size.height));
+    HairPainter(config).paint(canvas, size);
+    canvas.restore();
 
-    if (backHairStyles.contains(config.hair.style)) {
-      HairPainter(config).paint(canvas, size);
-    }
-
-    // Body + clothing
+    // Body + head skin drawn over the hair centre — clears the face area.
     BodyPainter(config).paint(canvas, size);
     ClothingPainter(config).paint(canvas, size);
 
-    // Front hair (short styles that sit on top of head)
-    if (!backHairStyles.contains(config.hair.style)) {
-      HairPainter(config).paint(canvas, size);
-    }
+    // Pass 2 — hair crown cap (y < 28% of height).
+    // Draws the top of the hair sitting on the head, above the brow line.
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height * 0.28));
+    HairPainter(config).paint(canvas, size);
+    canvas.restore();
 
-    // Face always on top
+    // Face always last — on top of everything.
     FacePainter(config).paint(canvas, size);
   }
 
