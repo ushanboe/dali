@@ -8,11 +8,14 @@ library dali;
 export 'src/widgets/dali_avatar.dart';
 export 'src/widgets/dali_scene.dart';
 export 'src/widgets/dali_object.dart';
+export 'src/widgets/dali_effects.dart';
+export 'src/widgets/dali_badge.dart';
 
 // Models
 export 'src/models/avatar_config.dart';
 export 'src/models/scene_config.dart';
 export 'src/models/object_config.dart';
+export 'src/models/effects_config.dart';
 
 // Palettes
 export 'src/palettes/skin_tones.dart';

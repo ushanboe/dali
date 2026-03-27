@@ -192,49 +192,64 @@ class HairPainter extends CustomPainter {
       double Function(double) sw, double Function(double) sh,
       Paint base, Paint hi) {
     final path = Path();
-    path.moveTo(sw(0.30), sh(0.34));
-    path.lineTo(sw(0.30), sh(0.12));
-    path.quadraticBezierTo(sw(0.50), sh(0.04), sw(0.70), sh(0.12));
-    path.lineTo(sw(0.70), sh(0.34));
-    // Rounded chin-length bottom
-    path.quadraticBezierTo(sw(0.70), sh(0.38), sw(0.65), sh(0.38));
-    path.lineTo(sw(0.35), sh(0.38));
-    path.quadraticBezierTo(sw(0.30), sh(0.38), sw(0.30), sh(0.34));
+    // Outer silhouette: sides hang straight to jaw, slightly flared
+    path.moveTo(sw(0.24), sh(0.42));
+    path.cubicTo(sw(0.20), sh(0.32), sw(0.22), sh(0.16), sw(0.28), sh(0.10));
+    path.quadraticBezierTo(sw(0.50), sh(0.02), sw(0.72), sh(0.10));
+    path.cubicTo(sw(0.78), sh(0.16), sw(0.80), sh(0.32), sw(0.76), sh(0.42));
+    // Straight flat bottom with slight curve inward at centre
+    path.cubicTo(sw(0.74), sh(0.44), sw(0.64), sh(0.46), sw(0.54), sh(0.44));
+    path.quadraticBezierTo(sw(0.50), sh(0.43), sw(0.46), sh(0.44));
+    path.cubicTo(sw(0.36), sh(0.46), sw(0.26), sh(0.44), sw(0.24), sh(0.42));
     path.close();
     canvas.drawPath(path, base);
-    canvas.drawLine(s(0.40, 0.09), s(0.40, 0.37), hi);
-    canvas.drawLine(s(0.50, 0.06), s(0.50, 0.37), hi);
-    canvas.drawLine(s(0.60, 0.09), s(0.60, 0.37), hi);
+    // Highlight strands
+    canvas.drawLine(s(0.38, 0.07), s(0.34, 0.44), hi);
+    canvas.drawLine(s(0.50, 0.04), s(0.50, 0.44), hi);
+    canvas.drawLine(s(0.62, 0.07), s(0.66, 0.44), hi);
   }
 
   // ── Ponytail ──────────────────────────────────────────────────────────────
   void _ponytail(Canvas canvas, Offset Function(double, double) s,
       double Function(double) sw, double Function(double) sh,
       Paint base, Paint hi) {
-    // Sides and top pulled back
-    final path = Path();
-    path.moveTo(sw(0.34), sh(0.32));
-    path.lineTo(sw(0.34), sh(0.12));
-    path.quadraticBezierTo(sw(0.50), sh(0.04), sw(0.66), sh(0.12));
-    path.lineTo(sw(0.66), sh(0.32));
-    path.quadraticBezierTo(sw(0.58), sh(0.28), sw(0.50), sh(0.28));
-    path.quadraticBezierTo(sw(0.42), sh(0.28), sw(0.34), sh(0.32));
-    path.close();
-    canvas.drawPath(path, base);
-
-    // Hair tie
-    final tiePaint = Paint()..color = _darken(base.color, 0.3);
-    canvas.drawCircle(s(0.50, 0.24), sw(0.04), tiePaint);
-
-    // Ponytail flowing down
+    // Tail drawn first so cap sits on top
     final tail = Path();
-    tail.moveTo(sw(0.46), sh(0.24));
-    tail.cubicTo(sw(0.42), sh(0.36), sw(0.44), sh(0.52), sw(0.48), sh(0.62));
-    tail.cubicTo(sw(0.50), sh(0.68), sw(0.52), sh(0.62), sw(0.52), sh(0.62));
-    tail.cubicTo(sw(0.56), sh(0.52), sw(0.58), sh(0.36), sw(0.54), sh(0.24));
+    tail.moveTo(sw(0.44), sh(0.18));
+    tail.cubicTo(sw(0.38), sh(0.30), sw(0.36), sh(0.48), sw(0.40), sh(0.64));
+    tail.cubicTo(sw(0.44), sh(0.74), sw(0.56), sh(0.74), sw(0.60), sh(0.64));
+    tail.cubicTo(sw(0.64), sh(0.48), sw(0.62), sh(0.30), sw(0.56), sh(0.18));
     tail.close();
     canvas.drawPath(tail, base);
-    canvas.drawLine(s(0.50, 0.25), s(0.50, 0.62), hi);
+    canvas.drawLine(s(0.50, 0.20), s(0.50, 0.72), hi);
+
+    // Head cap — smooth sides pulled back tight
+    final cap = Path();
+    cap.moveTo(sw(0.32), sh(0.30));
+    cap.cubicTo(sw(0.28), sh(0.20), sw(0.30), sh(0.10), sw(0.34), sh(0.06));
+    cap.quadraticBezierTo(sw(0.50), sh(0.00), sw(0.66), sh(0.06));
+    cap.cubicTo(sw(0.70), sh(0.10), sw(0.72), sh(0.20), sw(0.68), sh(0.30));
+    // Smooth curve back to the tie point
+    cap.cubicTo(sw(0.64), sh(0.26), sw(0.56), sh(0.22), sw(0.50), sh(0.22));
+    cap.cubicTo(sw(0.44), sh(0.22), sw(0.36), sh(0.26), sw(0.32), sh(0.30));
+    cap.close();
+    canvas.drawPath(cap, base);
+
+    // Hair tie band
+    final tiePaint = Paint()
+      ..color = _darken(base.color, 0.28)
+      ..style = PaintingStyle.fill;
+    canvas.drawOval(
+      Rect.fromCenter(center: s(0.50, 0.20), width: sw(0.12), height: sh(0.06)),
+      tiePaint,
+    );
+    // Tie highlight
+    canvas.drawOval(
+      Rect.fromCenter(center: s(0.48, 0.18), width: sw(0.04), height: sh(0.02)),
+      Paint()..color = hi.color..style = PaintingStyle.fill,
+    );
+    // Cap highlight strand
+    canvas.drawLine(s(0.44, 0.04), s(0.42, 0.22), hi);
   }
 
   // ── Bun ───────────────────────────────────────────────────────────────────

@@ -34,7 +34,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -59,6 +59,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome>
             Tab(icon: Icon(Icons.person), text: 'Avatar'),
             Tab(icon: Icon(Icons.landscape), text: 'Scenes'),
             Tab(icon: Icon(Icons.category), text: 'Objects'),
+            Tab(icon: Icon(Icons.auto_awesome), text: 'Effects'),
           ],
         ),
       ),
@@ -68,6 +69,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome>
           AvatarCustomiserPage(),
           SceneShowcasePage(),
           ObjectsShowcasePage(),
+          EffectsShowcasePage(),
         ],
       ),
     );
@@ -587,5 +589,261 @@ class _ObjectsShowcasePageState extends State<ObjectsShowcasePage> {
     FurnitureType.bed => 'Bed', FurnitureType.sofa => 'Sofa',
     FurnitureType.lamp => 'Lamp', FurnitureType.mirror => 'Mirror',
     FurnitureType.shelf => 'Shelf', FurnitureType.door => 'Door',
+  };
+}
+
+// ── Effects Tab ───────────────────────────────────────────────────────────────
+
+class EffectsShowcasePage extends StatefulWidget {
+  const EffectsShowcasePage({super.key});
+
+  @override
+  State<EffectsShowcasePage> createState() => _EffectsShowcasePageState();
+}
+
+class _EffectsShowcasePageState extends State<EffectsShowcasePage> {
+  ParticleType _particle = ParticleType.confetti;
+  BadgeType _badge = BadgeType.star;
+  bool _animateBadge = true;
+  int _badgeKey = 0;
+
+  static const _badgeColors = [
+    Color(0xFFFFD600), Color(0xFFE53935), Color(0xFF9C27B0),
+    Color(0xFF1565C0), Color(0xFF00897B), Color(0xFF4CAF50),
+  ];
+  int _badgeColorIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // ── Particles ────────────────────────────────────────────────────────
+        _section('Particle Effects'),
+        _chips(ParticleType.values, _particle,
+            (v) => setState(() => _particle = v),
+            label: _particleLabel),
+        const SizedBox(height: 12),
+        // Live particle preview
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: 200,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                DaliEffects(type: _particle),
+                Center(
+                  child: Text(
+                    _particleLabel(_particle),
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 14,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // Particle over avatar demo
+        _section('Particles Over Scene'),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: 180,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                DaliScene(config: const SceneConfig(
+                  type: SceneType.park, timeOfDay: DayTime.day,
+                )),
+                DaliEffects(type: _particle),
+                Positioned(
+                  bottom: 0, left: 0, right: 0,
+                  child: Center(
+                    child: DaliAvatar(
+                      config: const AvatarConfig(
+                        skinTone: Color(0xFFF5C5A3),
+                        hair: HairConfig(style: HairStyle.longCurly, color: Color(0xFF6B3A1F)),
+                        face: FaceConfig(expression: FaceExpression.excited, blush: true),
+                        clothing: ClothingConfig(item: ClothingItem.dress, primaryColor: Color(0xFFE91E8C)),
+                      ),
+                      size: 110,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // ── Badges ───────────────────────────────────────────────────────────
+        _section('Achievement Badges'),
+        _chips(BadgeType.values, _badge,
+            (v) => setState(() => _badge = v),
+            label: _badgeLabel),
+        const SizedBox(height: 8),
+        // Badge color row
+        SizedBox(
+          height: 44,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _badgeColors.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, i) {
+              final sel = i == _badgeColorIndex;
+              return GestureDetector(
+                onTap: () => setState(() => _badgeColorIndex = i),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    color: _badgeColors[i], shape: BoxShape.circle,
+                    border: Border.all(
+                      color: sel ? const Color(0xFF9B59B6) : Colors.white,
+                      width: sel ? 3 : 2,
+                    ),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 4)],
+                  ),
+                  child: sel ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Badge preview with re-animate button
+        Center(
+          child: Column(
+            children: [
+              DaliBadge(
+                key: ValueKey(_badgeKey),
+                type: _badge,
+                size: 160,
+                color: _badgeColors[_badgeColorIndex],
+                animate: _animateBadge,
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () => setState(() {
+                  _animateBadge = true;
+                  _badgeKey++;
+                }),
+                icon: const Icon(Icons.replay),
+                label: const Text('Replay Animation'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF9B59B6),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Badge grid
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12, runSpacing: 12,
+          children: BadgeType.values.map((b) {
+            final sel = b == _badge;
+            return GestureDetector(
+              onTap: () => setState(() { _badge = b; _badgeKey++; }),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: sel ? const Color(0xFF9B59B6) : Colors.grey.shade200,
+                        width: sel ? 2.5 : 1.5,
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(6),
+                    child: DaliBadge(type: b, size: 72,
+                        color: _badgeColors[_badgeColorIndex], animate: false),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(_badgeLabel(b), style: TextStyle(
+                    fontSize: 10,
+                    color: sel ? const Color(0xFF6B3A8A) : Colors.black54,
+                    fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                  )),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _section(String t) => Padding(
+    padding: const EdgeInsets.only(top: 20, bottom: 8),
+    child: Text(t, style: const TextStyle(
+      fontWeight: FontWeight.bold, fontSize: 15,
+      color: Color(0xFF6B3A8A), letterSpacing: 0.5,
+    )),
+  );
+
+  Widget _chips<T>(List<T> values, T selected, ValueChanged<T> onTap,
+      {required String Function(T) label}) {
+    return Wrap(
+      spacing: 8, runSpacing: 8,
+      children: values.map((v) {
+        final sel = v == selected;
+        return GestureDetector(
+          onTap: () => onTap(v),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: sel ? const Color(0xFF9B59B6) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: sel ? const Color(0xFF9B59B6) : Colors.grey.shade300),
+            ),
+            child: Text(label(v), style: TextStyle(fontSize: 12,
+                fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                color: sel ? Colors.white : Colors.black87)),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  String _particleLabel(ParticleType t) => switch (t) {
+    ParticleType.confetti => 'Confetti',
+    ParticleType.sparkles => 'Sparkles',
+    ParticleType.bubbles  => 'Bubbles',
+    ParticleType.stars    => 'Stars',
+    ParticleType.hearts   => 'Hearts',
+    ParticleType.snow     => 'Snow',
+  };
+
+  String _badgeLabel(BadgeType t) => switch (t) {
+    BadgeType.star    => 'Star',
+    BadgeType.trophy  => 'Trophy',
+    BadgeType.ribbon  => 'Ribbon',
+    BadgeType.medal   => 'Medal',
+    BadgeType.shield  => 'Shield',
+    BadgeType.crown   => 'Crown',
+    BadgeType.heart   => 'Heart',
+    BadgeType.diamond => 'Diamond',
   };
 }
