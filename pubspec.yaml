@@ -1,7 +1,7 @@
 name: dali
 description: Procedural graphics engine for Flutter — generate characters, scenes, and visual assets entirely in code. No image files required.
 version: 0.1.0
-homepage: https://github.com/bobbotboe/dali
+homepage: https://github.com/ushanboe/dali
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
