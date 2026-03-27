@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/object_config.dart';
 
@@ -42,18 +43,8 @@ class FoodPainter extends CustomPainter {
     return h.withLightness((h.lightness - amt).clamp(0.0, 1.0)).toColor();
   }
 
-  double _approxCos(double a) {
-    a = a % (2 * 3.14159265);
-    double x = 1, term = 1;
-    for (int i = 1; i <= 6; i++) {
-      term *= -a * a / (2 * i * (2 * i - 1));
-      x += term;
-    }
-    return x;
-  }
-
-  double _cos(double a) => _approxCos(a);
-  double _sin(double a) => _approxCos(a - 1.5708);
+  double _cos(double a) => math.cos(a);
+  double _sin(double a) => math.sin(a);
 
   void _shine(Canvas canvas, Offset center, double r) {
     canvas.drawCircle(center, r * 0.22,

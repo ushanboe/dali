@@ -61,10 +61,11 @@ class _AvatarComposedPainter extends CustomPainter {
     BodyPainter(config).paint(canvas, size);
     ClothingPainter(config).paint(canvas, size);
 
-    // Pass 2 — hair crown cap (y < 28% of height).
+    // Pass 2 — hair crown cap (y < 16% of height).
     // Draws the top of the hair sitting on the head, above the brow line.
+    // Hairline is at y≈0.13, eyebrows at y≈0.175 — clip must stay below 0.175.
     canvas.save();
-    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height * 0.28));
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height * 0.16));
     HairPainter(config).paint(canvas, size);
     canvas.restore();
 

@@ -33,18 +33,8 @@ class ParticlePainter extends CustomPainter {
   bool shouldRepaint(ParticlePainter old) => old.time != time || old.type != type;
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  double _approxCos(double a) {
-    a = a % (2 * 3.14159265);
-    double x = 1, term = 1;
-    for (int i = 1; i <= 6; i++) {
-      term *= -a * a / (2 * i * (2 * i - 1));
-      x += term;
-    }
-    return x;
-  }
-
-  double _cos(double a) => _approxCos(a);
-  double _sin(double a) => _approxCos(a - 1.5708);
+  double _cos(double a) => math.cos(a);
+  double _sin(double a) => math.sin(a);
 
   /// Deterministic pseudo-random from seed — uses sin hash for good spread.
   double _rand(int seed) {

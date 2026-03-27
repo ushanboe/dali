@@ -293,6 +293,7 @@ dali/
 4. **Height-based sizing** — detail elements use `sz.height * scale` so proportions stay correct at any aspect ratio
 5. **Animatable** — any parameter can be driven by an `AnimationController`
 6. **Standalone** — no dependencies beyond Flutter itself
+7. **Exact trig** — all painters use `dart:math` (`math.cos`/`math.sin`) directly for correct geometry at all angles
 
 ---
 

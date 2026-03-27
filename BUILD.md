@@ -112,8 +112,16 @@ dali/
 Hair layering solved with canvas clip regions:
 1. Pass 1 — clip to `y > 15%` → draws hair sides/back behind body
 2. Body + clothing drawn over
-3. Pass 2 — clip to `y < 28%` → draws hair crown cap on top
+3. Pass 2 — clip to `y < 16%` → draws hair crown cap on top (above brow line)
 4. Face drawn last (always on top)
+
+**Critical:** Pass 2 clip must stay below `y = 0.175` (brow line). Originally set to 28% which caused hair to overdraw eyes and brows. Corrected to 16%.
+
+### Key Technical Decision — Solid Crown Cap
+All hair styles use a `_capPath()` helper that produces a **solid filled shape** (not a crescent/ring). The hairline sits at `y ≈ 0.13`; the crown covers `y = 0` to `y ≈ 0.13`. Inner hollows were the original bug — they let the scalp show through the hair.
+
+### Key Technical Decision — Exact Trigonometry
+All painters use `dart:math` (`math.cos` / `math.sin`) directly. An earlier Taylor-series approximation (`_approxCos`, 6 terms) was inaccurate beyond ~π radians, causing misshapen star paths and vehicle wheel spokes.
 
 ---
 
@@ -172,9 +180,11 @@ All detail element sizes use `sz.height * scale` (not `sz.width * scale`). This 
 |---|---|---|
 | `ParticlePainter` | ✅ | 6 particle types driven by `time` (0.0–1.0) |
 | `DaliEffects` widget | ✅ | `AnimationController`-driven looping overlay |
-| `BadgePainter` | ✅ | 8 achievement badge designs with glow |
+| `BadgePainter` | ✅ | 8 achievement badge designs — drop shadows, bold outlines, `math.cos` star paths |
 | `DaliBadge` widget | ✅ | Bounce-in scale/fade reveal animation |
-| Hair style fixes | ✅ | Bob and Ponytail paths rebuilt with correct proportions |
+| All 12 hair styles | ✅ | Complete rewrite — solid crown caps, correct hairline at y=0.13 |
+| Two-pass clip fix | ✅ | Pass 2 clip tightened from 28% → 16% (stops above brow line) |
+| Trig accuracy fix | ✅ | All painters: `_approxCos` replaced with `math.cos` / `math.sin` |
 | Example app — Effects tab | ✅ | Live particles, scene overlay, badge gallery with replay |
 
 ### Particle Types
@@ -185,6 +195,9 @@ All detail element sizes use `sz.height * scale` (not `sz.width * scale`). This 
 
 ### Key Technical Decision — Sin-Hash RNG
 Particles use `(sin(seed * 127.1 + 311.7) * 43758.5453).abs() % 1.0` for deterministic pseudo-random positions. This provides well-distributed spread across the canvas — an LCG (linear congruential generator) was initially used but produced values clustered near 0.5 for small sequential seeds.
+
+### Key Technical Decision — Badge Stars
+`BadgePainter` uses `math.cos` / `math.sin` for star point geometry. The earlier `_approxCos` Taylor series diverged past π rad, producing misshapen star points on the Star, Ribbon, and Shield badges.
 
 ---
 

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/object_config.dart';
 
@@ -56,8 +57,8 @@ class VehiclePainter extends CustomPainter {
     // Spokes
     for (int i = 0; i < 5; i++) {
       final angle = i * 1.2566;
-      final cos = _approxCos(angle);
-      final sin = _approxCos(angle - 1.5708);
+      final cos = math.cos(angle);
+      final sin = math.sin(angle);
       canvas.drawLine(
         Offset(center.dx + cos * r * 0.28, center.dy + sin * r * 0.28),
         Offset(center.dx + cos * r * 0.62, center.dy + sin * r * 0.62),
@@ -66,15 +67,7 @@ class VehiclePainter extends CustomPainter {
     }
   }
 
-  double _approxCos(double a) {
-    a = a % (2 * 3.14159265);
-    double x = 1, term = 1;
-    for (int i = 1; i <= 6; i++) {
-      term *= -a * a / (2 * i * (2 * i - 1));
-      x += term;
-    }
-    return x;
-  }
+
 
   // ── Car ────────────────────────────────────────────────────────────────────
   void _paintCar(Canvas canvas, Size sz) {
