@@ -36,6 +36,18 @@ class ScenePainter extends CustomPainter {
   Paint _stroke(Color c, double w) => Paint()
     ..color = c..style = PaintingStyle.stroke..strokeWidth = w..strokeCap = StrokeCap.round;
 
+  double _cos(double a) => a == 0 ? 1 : (a == 1.5708 ? 0 : (a == 3.14159 ? -1 : (a == 4.71239 ? 0 : _approxCos(a))));
+  double _sin(double a) => _approxCos(a - 1.5708);
+  double _approxCos(double a) {
+    a = a % (2 * 3.14159265);
+    double x = 1, term = 1;
+    for (int i = 1; i <= 6; i++) {
+      term *= -a * a / (2 * i * (2 * i - 1));
+      x += term;
+    }
+    return x;
+  }
+
   Color _darken(Color c, double amt) {
     final h = HSLColor.fromColor(c);
     return h.withLightness((h.lightness - amt).clamp(0.0, 1.0)).toColor();
